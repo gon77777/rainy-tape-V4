@@ -1,0 +1,64 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  windows:
+    name: Windows (VST3)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build --config Release -j
+      - name: Upload VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: TapeLofi-Windows-VST3
+          path: build/TapeLofi_artefacts/Release/VST3/**
+
+  macos:
+    name: macOS (VST3 + AU)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build --config Release -j
+      - name: Upload VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: TapeLofi-macOS-VST3
+          path: build/TapeLofi_artefacts/Release/VST3/**
+      - name: Upload AU
+        uses: actions/upload-artifact@v4
+        with:
+          name: TapeLofi-macOS-AU
+          path: build/TapeLofi_artefacts/Release/AU/**
+
+  linux:
+    name: Linux (VST3)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install JUCE dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libx11-dev libxext-dev libxinerama-dev \
+            libxrandr-dev libxcursor-dev libfreetype6-dev libfontconfig1-dev \
+            libgl1-mesa-dev libcurl4-openssl-dev libwebkit2gtk-4.1-dev
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build --config Release -j
+      - name: Upload VST3
+        uses: actions/upload-artifact@v4
+        with:
+          name: TapeLofi-Linux-VST3
+          path: build/TapeLofi_artefacts/Release/VST3/**
